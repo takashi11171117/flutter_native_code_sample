@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_native_code_sample/native_view.dart';
 
 void main() => runApp(const MyApp());
 
@@ -31,15 +32,47 @@ class MyHomePage extends StatefulWidget {
 }
 
 class MyHomePageState extends State<MyHomePage> {
-  static const platform = MethodChannel('battery');
-
   String _batteryLevel = 'Unknown battery level.';
 
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            /// Method Channel
+            ElevatedButton(
+              onPressed: _getBatteryLevel,
+              child: const Text('Get Battery Level'),
+            ),
+            Text(_batteryLevel),
+            /// Event Channel
+            StreamBuilder<int>(
+                stream: _streamCounter(),
+                builder: (context, snapshot) {
+                  if (snapshot.hasData) {
+                    return Text(
+                      '${snapshot.data}',
+                    );
+                  } else {
+                    return const CircularProgressIndicator();
+                  }
+                }),
+            /// PlatFormView Android
+            const Center(child: SizedBox(height: 100, child: NativeView())),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// Method Channel
   Future<void> _getBatteryLevel() async {
     // Get battery level.
     String batteryLevel;
     try {
-      final int result = await platform.invokeMethod('getBatteryLevel');
+      final int result = await const MethodChannel('battery').invokeMethod('getBatteryLevel');
       batteryLevel = 'Battery level at $result % .';
     } on PlatformException catch (e) {
       batteryLevel = "Failed to get battery level: '${e.message}'.";
@@ -50,37 +83,8 @@ class MyHomePageState extends State<MyHomePage> {
     });
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      child: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: [
-            ElevatedButton(
-              onPressed: _getBatteryLevel,
-              child: const Text('Get Battery Level'),
-            ),
-            Text(_batteryLevel),
-            StreamBuilder<int>(
-                stream: streamCounter(),
-                builder: (context, snapshot) {
-                  if (snapshot.hasData) {
-                    return Text(
-                      '${snapshot.data}',
-                      style: Theme.of(context).textTheme.headline4,
-                    );
-                  } else {
-                    return const CircularProgressIndicator();
-                  }
-                }),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Stream<int> streamCounter() {
+  /// Event Channel
+  Stream<int> _streamCounter() {
     const counterChannel = EventChannel('counter');
     return counterChannel.receiveBroadcastStream().map((event) {
       return int.parse(event.toString());
