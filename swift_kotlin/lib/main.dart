@@ -62,9 +62,29 @@ class MyHomePageState extends State<MyHomePage> {
               child: const Text('Get Battery Level'),
             ),
             Text(_batteryLevel),
+            StreamBuilder<int>(
+                stream: streamCounter(),
+                builder: (context, snapshot) {
+                  if (snapshot.hasData) {
+                    return Text(
+                      '${snapshot.data}',
+                      style: Theme.of(context).textTheme.headline4,
+                    );
+                  } else {
+                    return const CircularProgressIndicator();
+                  }
+                }),
           ],
         ),
       ),
     );
   }
+
+  Stream<int> streamCounter() {
+    const counterChannel = EventChannel('counter');
+    return counterChannel.receiveBroadcastStream().map((event) {
+      return int.parse(event.toString());
+    });
+  }
 }
+
