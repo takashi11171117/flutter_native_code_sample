@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_native_code_sample/pages/basic_message_channel_page.dart';
 import 'package:flutter_native_code_sample/pages/event_channel_page.dart';
 import 'package:flutter_native_code_sample/pages/method_channel_page.dart';
 import 'package:flutter_native_code_sample/pages/platform_view_page.dart';
@@ -58,6 +60,17 @@ class MyHomePageState extends State<MyHomePage> {
                 );
               },
               child: const Text('Method Channel Demo'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (BuildContext context) =>
+                        const BasicMessageChannelPage(),
+                  ),
+                );
+              },
+              child: const Text('Basic Message Channel Demo'),
             ),
             ElevatedButton(
               onPressed: () {

@@ -8,13 +8,16 @@ import Flutter
     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
   ) -> Bool {
     let controller : FlutterViewController = window?.rootViewController as! FlutterViewController
-    let batteryChannel = FlutterMethodChannel(name: "battery",
-                                              binaryMessenger: controller.binaryMessenger)
-    let counterEventChannel = FlutterEventChannel(name: "counter", binaryMessenger: controller.binaryMessenger)
 
-    batteryChannel.setMethodCallHandler({
+    let methodChannel = FlutterMethodChannel(name: "battery",
+                                              binaryMessenger: controller.binaryMessenger)
+    let eventChannel = FlutterEventChannel(name: "counter", binaryMessenger: controller.binaryMessenger)
+    let basicMessageChannel = FlutterBasicMessageChannel(name: "message",
+                                                  binaryMessenger: controller.binaryMessenger,
+                                                  codec: FlutterStringCodec.sharedInstance())
+
+    methodChannel.setMethodCallHandler({
       [weak self] (call: FlutterMethodCall, result: FlutterResult) -> Void in
-      // Note: this method is invoked on the UI thread.
       guard call.method == "getBatteryLevel" else {
         result(FlutterMethodNotImplemented)
         return
@@ -22,7 +25,18 @@ import Flutter
       self?.receiveBatteryLevel(result: result)
     })
 
-    counterEventChannel.setStreamHandler(CounterHandler())
+    eventChannel.setStreamHandler(CounterHandler())
+
+    basicMessageChannel.setMessageHandler { (message: Any?, reply: @escaping FlutterReply) in
+      print("iOS: Received message = \(String(describing: message))")
+      reply("Reply from iOS")
+    }
+
+    DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+      basicMessageChannel.sendMessage("Hello World from iOS") { (reply) in
+        print("iOS: \(String(describing: reply))")
+      }
+    }
     
     GeneratedPluginRegistrant.register(with: self)
     return super.application(application, didFinishLaunchingWithOptions: launchOptions)

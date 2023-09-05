@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-class NativeView extends StatelessWidget {
-  const NativeView({
+class VirtualDisplay extends StatelessWidget {
+  const VirtualDisplay({
     Key? key,
   }) : super(key: key);
 
@@ -11,7 +11,7 @@ class NativeView extends StatelessWidget {
     final Map<String, dynamic> creationParams = <String, dynamic>{};
 
     return AndroidView(
-      viewType: 'text',
+      viewType: 'native_view',
       layoutDirection: TextDirection.ltr,
       creationParams: creationParams,
       creationParamsCodec: const StandardMessageCodec(),
