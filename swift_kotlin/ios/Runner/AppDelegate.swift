@@ -8,6 +8,17 @@ import Flutter
     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
   ) -> Bool {
     let controller : FlutterViewController = window?.rootViewController as! FlutterViewController
+    let registrar = registrar(forPlugin: "com.example.flutterNativeCodeSample")
+
+    if let registrarUnwrapped = registrar {
+      let factory = NativeViewFactory(messenger: registrarUnwrapped.messenger())
+      registrarUnwrapped.register(
+        factory,
+        withId: "native_view"
+      )
+    } else {
+      print("Error: Could not obtain FlutterPluginRegistrar")
+    }
 
     let methodChannel = FlutterMethodChannel(name: "battery",
                                               binaryMessenger: controller.binaryMessenger)
