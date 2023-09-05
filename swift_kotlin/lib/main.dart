@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_native_code_sample/pages/basic_message_channel_page.dart';
 import 'package:flutter_native_code_sample/pages/event_channel_page.dart';
 import 'package:flutter_native_code_sample/pages/method_channel_page.dart';
+import 'package:flutter_native_code_sample/pages/pigeon_page.dart';
 import 'package:flutter_native_code_sample/pages/platform_view_page.dart';
 
 void main() => runApp(const MyApp());
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  const MyApp({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -81,6 +81,16 @@ class MyHomePageState extends State<MyHomePage> {
                 );
               },
               child: const Text('Platform View Demo'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (BuildContext context) => const PigeonPage(),
+                  ),
+                );
+              },
+              child: const Text('Pigeon Demo'),
             ),
           ],
         ),

@@ -24,6 +24,7 @@ class MainActivity : FlutterActivity() {
     private val METHOD_CHANNEL = "battery"
     private val EVENT_CHANNEL = "counter"
     private val BASIC_MESSAGE_CHANNEL = "message"
+    private var message: String? = null
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine);
@@ -68,6 +69,17 @@ class MainActivity : FlutterActivity() {
                 Log.d("Android", "$reply")
             }
         }, 500)
+
+        MessageApi.setUp(flutterEngine.dartExecutor.binaryMessenger, object: MessageApi {
+            override fun sendMessage(msg: Message) {
+                message = msg.content
+            }
+
+            override fun receiveMessage(): Message {
+                var msg = Message(message)
+                return msg
+            }
+        })
     }
 
     private fun getBatteryLevel(): Int {

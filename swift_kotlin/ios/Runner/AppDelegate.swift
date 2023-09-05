@@ -48,6 +48,9 @@ import Flutter
         print("iOS: \(String(describing: reply))")
       }
     }
+
+    let api = MessageApiImpl()
+    MessageApiSetup.setUp(binaryMessenger: controller.binaryMessenger, api: api)
     
     GeneratedPluginRegistrant.register(with: self)
     return super.application(application, didFinishLaunchingWithOptions: launchOptions)
@@ -89,4 +92,16 @@ class CounterHandler: NSObject, FlutterStreamHandler {
         timer = nil
         return nil
     }
+}
+
+class MessageApiImpl: NSObject, MessageApi {
+  private var message: String?
+
+  func sendMessage(msg: Message) {
+    message = msg.content
+  }
+
+  func receiveMessage() -> Message {
+    return Message(content: message)
+  }
 }
