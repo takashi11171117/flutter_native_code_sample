@@ -10,6 +10,7 @@ import Flutter
     let controller : FlutterViewController = window?.rootViewController as! FlutterViewController
     let registrar = registrar(forPlugin: "com.example.flutterNativeCodeSample")
 
+    // PlatformView用に、UIの登録
     if let registrarUnwrapped = registrar {
       let factory = NativeViewFactory(messenger: registrarUnwrapped.messenger())
       registrarUnwrapped.register(
@@ -20,6 +21,7 @@ import Flutter
       print("Error: Could not obtain FlutterPluginRegistrar")
     }
 
+    // 各チャンネルの定義
     let methodChannel = FlutterMethodChannel(name: "battery",
                                               binaryMessenger: controller.binaryMessenger)
     let eventChannel = FlutterEventChannel(name: "counter", binaryMessenger: controller.binaryMessenger)
@@ -27,6 +29,7 @@ import Flutter
                                                   binaryMessenger: controller.binaryMessenger,
                                                   codec: FlutterStringCodec.sharedInstance())
 
+    // Method Channel Handler
     methodChannel.setMethodCallHandler({
       [weak self] (call: FlutterMethodCall, result: FlutterResult) -> Void in
       guard call.method == "getBatteryLevel" else {
@@ -36,26 +39,31 @@ import Flutter
       self?.receiveBatteryLevel(result: result)
     })
 
+    // Event Channel Handler
     eventChannel.setStreamHandler(CounterHandler())
 
+    // Basic Message Channel Handler
     basicMessageChannel.setMessageHandler { (message: Any?, reply: @escaping FlutterReply) in
       print("iOS: Received message = \(String(describing: message))")
       reply("Reply from iOS")
     }
 
+    // Basic Message ChannelでFlutterにReply
     DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
       basicMessageChannel.sendMessage("Hello World from iOS") { (reply) in
         print("iOS: \(String(describing: reply))")
       }
     }
 
+    // Pigeonの設定
     let api = MessageApiImpl()
     MessageApiSetup.setUp(binaryMessenger: controller.binaryMessenger, api: api)
     
     GeneratedPluginRegistrant.register(with: self)
     return super.application(application, didFinishLaunchingWithOptions: launchOptions)
   }
-    
+
+  // Method ChannelのHandler本体
   private func receiveBatteryLevel(result: FlutterResult) {
     let device = UIDevice.current
     device.isBatteryMonitoringEnabled = true
@@ -69,6 +77,7 @@ import Flutter
   }
 }
 
+// Event ChannelのHandler本体
 class CounterHandler: NSObject, FlutterStreamHandler {
     private let handler = DispatchQueue.main
     private var eventSink: FlutterEventSink?
@@ -94,6 +103,7 @@ class CounterHandler: NSObject, FlutterStreamHandler {
     }
 }
 
+// Pigeonのプロトコルから実体の定義
 class MessageApiImpl: NSObject, MessageApi {
   private var message: String?
 

@@ -21,6 +21,7 @@ import io.flutter.plugin.common.BasicMessageChannel
 import io.flutter.plugin.common.StringCodec
 
 class MainActivity : FlutterActivity() {
+    // 各チャンネル名の定義
     private val METHOD_CHANNEL = "battery"
     private val EVENT_CHANNEL = "counter"
     private val BASIC_MESSAGE_CHANNEL = "message"
@@ -28,11 +29,14 @@ class MainActivity : FlutterActivity() {
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine);
+
+        // PlatformView用に、UIの登録
         flutterEngine
             .platformViewsController
             .registry
             .registerViewFactory("native_view", NativeViewFactory());
 
+        // Method Channel Handler
         MethodChannel(
             flutterEngine.dartExecutor.binaryMessenger,
             METHOD_CHANNEL
@@ -50,10 +54,13 @@ class MainActivity : FlutterActivity() {
             }
         }
 
-        EventChannel(flutterEngine.dartExecutor.binaryMessenger, EVENT_CHANNEL).setStreamHandler(
-            CounterHandler
-        )
+        // Event Channel Handler
+        EventChannel(flutterEngine.dartExecutor.binaryMessenger, EVENT_CHANNEL)
+            .setStreamHandler(
+                CounterHandler
+            )
 
+        // Basic Message Channel Handler
         val basicMessageChannel = BasicMessageChannel(
             flutterEngine.dartExecutor.binaryMessenger,
             BASIC_MESSAGE_CHANNEL,
@@ -64,13 +71,15 @@ class MainActivity : FlutterActivity() {
             reply.reply("Reply from Android")
         }
 
+        // Basic Message ChannelでFlutterにReply
         Handler().postDelayed({
             basicMessageChannel.send("Hello World from Android") { reply ->
                 Log.d("Android", "$reply")
             }
         }, 500)
 
-        MessageApi.setUp(flutterEngine.dartExecutor.binaryMessenger, object: MessageApi {
+        // Pigeonの設定、インターフェースを使用して実体を定義
+        MessageApi.setUp(flutterEngine.dartExecutor.binaryMessenger, object : MessageApi {
             override fun sendMessage(msg: Message) {
                 message = msg.content
             }
@@ -82,6 +91,7 @@ class MainActivity : FlutterActivity() {
         })
     }
 
+    // Method ChannelのHandler本体
     private fun getBatteryLevel(): Int {
         val batteryLevel: Int
         if (VERSION.SDK_INT >= VERSION_CODES.LOLLIPOP) {
@@ -102,6 +112,7 @@ class MainActivity : FlutterActivity() {
     }
 }
 
+// Event ChannelのHandler本体
 object CounterHandler : EventChannel.StreamHandler {
     private val handler = Handler(Looper.getMainLooper())
     private var eventSink: EventChannel.EventSink? = null
